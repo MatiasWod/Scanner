@@ -10,36 +10,50 @@ public class Evaluator {
             put("-", 1);
             put("*", 2);
             put("/", 3);
+            put("^",4);
         }
     };
 
     boolean[][] precedenceMatriz =
-            {{true, true, false, false},
-                    {true, true, false, false},
-                    {true, true, true, true},
-                    {true, true, true, true},
+            {       {true, true, false, false,false},
+                    {true, true, false, false,false},
+                    {true, true, true, true,false},
+                    {true, true, true, true,false},
+                    {true, true, true, true,false},
             };
-
-    Scanner inputScanner = new Scanner(System.in).useDelimiter("\\n");
-    String line = inputScanner.nextLine();
-    Scanner lineScanner = new Scanner(line).useDelimiter("\\s+");
 
     public double evaluate() {
         double resp = 0;
-        System.out.println("Introduzca la expresión en notación postfija:");
+        Scanner inputScanner = new Scanner(System.in).useDelimiter("\\n");
+        System.out.println("Introduzca la expresión en notación infija:");
         inputScanner.hasNextLine();
+
+        String line = inputScanner.nextLine();
+
+        line=infijaToPostfija(line);
+
         Stack<Double> myStack = new Stack<>();
+
+        Scanner lineScanner = new Scanner(line).useDelimiter("\\s+");
+
         while (lineScanner.hasNext()) {
             String token = lineScanner.next();
-            if (token.matches("[+*/\\-]")) {
+            if (token.matches("[\\^+*\\/-]")) {
                 if (token.matches("\\+"))
                     resp = myStack.pop() + myStack.pop();
                 else if (token.matches("\\*"))
                     resp = myStack.pop() * myStack.pop();
-                else if (token.matches("/"))
-                    resp = myStack.pop() / myStack.pop();
+                else if (token.matches("\\/")) {
+                    double aux = myStack.pop();
+                    resp = myStack.pop() / aux;
+                }
+                else if(token.matches("\\^")){
+                    double aux=myStack.pop();
+                    resp=Math.pow(myStack.pop(),aux);
+                }
                 else {
-                    resp = myStack.pop() - myStack.pop();
+                    double aux=myStack.pop();
+                    resp = myStack.pop() - aux;
                 }
                 myStack.push(resp);
             } else {
@@ -50,30 +64,34 @@ public class Evaluator {
         return resp;
     }
 
-    private String infijaToPostfija() {
-        {
-            String postfija= "";
-            Stack<String> theStack= new Stack<String>();
+    private String infijaToPostfija(String line) {
+        Stack<String> myStack = new Stack<>();
+        StringBuilder toReturn=new StringBuilder();
+        int numberCount=0,operandCount=0;
 
-            while( lineScanner.hasNext() )   {
-                String currentToken = lineScanner.next();
+        Scanner lineScanner = new Scanner(line).useDelimiter("\\s+");
 
-                if ( currentToken.matches("[+*/\\-]") ) {
-                    postfija+= String.format("%s ", currentToken);
+        while(lineScanner.hasNext()){
+            String token=lineScanner.next();
+            if(token.matches("[\\^+*\\/-]")){
+                while (!myStack.isEmpty() && getPrecedence(myStack.peek(),token)){
+                    toReturn.append(myStack.pop()+" ");
                 }
-                else {
-                    while (!theStack.empty()  && getPrecedence(theStack.peek(), currentToken) ) {
-                        postfija+= String.format("%s ", theStack.pop() );
-                    }
-                    theStack.push(currentToken);
-                }
+                myStack.push(token);
+                operandCount++;
             }
-            while ( !theStack.empty() ) {
-                postfija+= String.format("%s ", theStack.pop() );
+            else{
+                Double.valueOf(token);
+                numberCount++;
+                toReturn.append(token+" ");
             }
-            return postfija;
         }
-
+        if (numberCount-1!=operandCount)
+            throw new IllegalArgumentException();
+        while (!myStack.isEmpty()) {
+            toReturn.append(myStack.pop()+" ");
+        }
+        return toReturn.toString();
     }
 
     private boolean getPrecedence(String tope, String current) {
