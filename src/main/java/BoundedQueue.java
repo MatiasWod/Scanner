@@ -22,9 +22,11 @@ public class BoundedQueue<T> {
         if(isFull()){
             throw new RuntimeException();
         }
-        elements[last+1]=element;
         qty++;
-        last=last+1;
+        last++;
+        last%=elements.length;
+        elements[last+1]=element;
+
     }
 
     public T dequeue(){
@@ -33,6 +35,7 @@ public class BoundedQueue<T> {
         }
         T toReturn=elements[first];
         first++;
+        first%=elements.length;
         qty--;
         return toReturn;
     }
@@ -41,5 +44,4 @@ public class BoundedQueue<T> {
         for(int i=first;i<last;i++)
             System.out.println(elements[i].toString());
     }
-
 }
