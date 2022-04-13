@@ -11,15 +11,17 @@ public class Evaluator {
             put("*", 2);
             put("/", 3);
             put("^",4);
+            put("(",5);
         }
     };
 
     boolean[][] precedenceMatriz =
-            {       {true, true, false, false,false},
-                    {true, true, false, false,false},
-                    {true, true, true, true,false},
-                    {true, true, true, true,false},
-                    {true, true, true, true,false},
+            {       {true, true, false, false,false,false,true},
+                    {true, true, false, false,false,false,true},
+                    {true, true, true, true,false,false,true},
+                    {true, true, true, true,false,false,true},
+                    {true, true, true, true,false,false,true},
+                    {false, false, false, false,false,false,false},
             };
 
     public double evaluate() {
@@ -31,6 +33,7 @@ public class Evaluator {
         String line = inputScanner.nextLine();
 
         line=infijaToPostfija(line);
+        System.out.println(line);
 
         Stack<Double> myStack = new Stack<>();
 
@@ -73,12 +76,20 @@ public class Evaluator {
 
         while(lineScanner.hasNext()){
             String token=lineScanner.next();
-            if(token.matches("[\\^+*\\/-]")){
-                while (!myStack.isEmpty() && getPrecedence(myStack.peek(),token)){
-                    toReturn.append(myStack.pop()+" ");
+            if(token.matches("[(^+*/-]")){
+                    while (!myStack.isEmpty() && getPrecedence(myStack.peek(),token)){
+                        toReturn.append(myStack.pop()+" ");
                 }
                 myStack.push(token);
                 operandCount++;
+            }
+            else if(token.matches("[)]")) {
+                while (!myStack.peek().equals("(")) {
+                    toReturn.append(myStack.pop());
+                    if(myStack.isEmpty())
+                        throw new IllegalArgumentException("Falta parentesis de inicio");
+                }
+                myStack.pop(); //saco el (
             }
             else{
                 Double.valueOf(token);
@@ -87,8 +98,10 @@ public class Evaluator {
             }
         }
         if (numberCount-1!=operandCount)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Cantidad incorrecta de operadores");
         while (!myStack.isEmpty()) {
+            if(myStack.peek().matches("[(]"))
+                throw new IllegalArgumentException("Falta parentesis de cierre");
             toReturn.append(myStack.pop()+" ");
         }
         return toReturn.toString();
