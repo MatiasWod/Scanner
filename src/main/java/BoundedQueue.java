@@ -1,4 +1,3 @@
-import java.sql.Array;
 
 public class BoundedQueue<T> {
     private T[] elements;
@@ -25,7 +24,7 @@ public class BoundedQueue<T> {
         qty++;
         last++;
         last%=elements.length;
-        elements[last+1]=element;
+        elements[last]=element;
 
     }
 

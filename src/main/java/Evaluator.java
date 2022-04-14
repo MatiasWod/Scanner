@@ -33,7 +33,6 @@ public class Evaluator {
         String line = inputScanner.nextLine();
 
         line=infijaToPostfija(line);
-        System.out.println(line);
 
         Stack<Double> myStack = new Stack<>();
 
@@ -81,11 +80,12 @@ public class Evaluator {
                         toReturn.append(myStack.pop()+" ");
                 }
                 myStack.push(token);
-                operandCount++;
+                if(!token.equals("("))
+                    operandCount++;
             }
             else if(token.matches("[)]")) {
                 while (!myStack.peek().equals("(")) {
-                    toReturn.append(myStack.pop());
+                    toReturn.append(myStack.pop()+" ");
                     if(myStack.isEmpty())
                         throw new IllegalArgumentException("Falta parentesis de inicio");
                 }
@@ -100,7 +100,7 @@ public class Evaluator {
         if (numberCount-1!=operandCount)
             throw new IllegalArgumentException("Cantidad incorrecta de operadores");
         while (!myStack.isEmpty()) {
-            if(myStack.peek().matches("[(]"))
+            if(myStack.peek().equals("("))
                 throw new IllegalArgumentException("Falta parentesis de cierre");
             toReturn.append(myStack.pop()+" ");
         }

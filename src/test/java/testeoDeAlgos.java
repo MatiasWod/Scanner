@@ -9,11 +9,11 @@ public class testeoDeAlgos {
     @Test
     public void testeoInfija(){
         // inyecto entrada estandard
-        String input= "3 * ( ( 5 - 10.2 ) / 0.5 ) - 2";
+        String input= "3 *  (   (   5  -  10.2 ) / 0.5 ) -  2";
         InputStream inputstream= new ByteArrayInputStream(input.getBytes());
         System.setIn(inputstream);
         Double rta = new Evaluator().evaluate();
-        assertEquals(23, rta);
+        assertEquals(-33.199999999999996, rta);
         System.setIn(System.in);
     }
 
